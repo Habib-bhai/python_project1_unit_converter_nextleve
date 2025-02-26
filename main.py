@@ -1,8 +1,7 @@
 import streamlit as st
 from google import genai
-import pyttsx3
+from gtts import gTTS  # Import gTTS
 import os
-
 
 # Custom CSS with dark theme and animations (keeping all original styles)
 st.markdown("""
@@ -321,7 +320,6 @@ else:
                 st.session_state["conversion_in_progress"] = True
                 
                 try:
-                
                     response = client.models.generate_content(
                         model="gemini-2.0-flash",
                         contents=f"Convert {sub_unit_from_value} {sub_unit_from} to {sub_unit_to}, for the conversion part just give answer like this: this value in this unit is equal to this value in this unit, and end the response with a little dark humor or funny sentence at last, but keep it short (the funny or dark humor should be at the end of the response and be of around maximum 10 words)",
@@ -333,14 +331,9 @@ else:
                     
                     output_path = './temp/output.mp3'
                     
-                    # Generate audio in a separate block
-                    engine = pyttsx3.init()
-                    voices = engine.getProperty('voices')
-                    engine.setProperty('voice', voices[0].id)
-                    engine.setProperty('rate', 155)
-                    engine.save_to_file(st.session_state["conversion_result"], output_path)
-                    engine.runAndWait()
-                    engine.stop()
+                    # Generate audio using gTTS
+                    tts = gTTS(text=st.session_state["conversion_result"], lang='en')
+                    tts.save(output_path)
                     
                     st.session_state["audio_path"] = output_path
                     
@@ -349,7 +342,6 @@ else:
                     
         
         # Display results if available
-     
         
         if st.session_state["audio_path"] and os.path.exists(st.session_state["audio_path"]):
             with open(st.session_state["audio_path"], 'rb') as audio_file:
